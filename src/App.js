@@ -4,6 +4,9 @@ import MoviesList from './components/MoviesList';
 import './App.css';
 import AddMovie from './components/AddMovie';
 
+const API_URL =
+	'https://react-api-http-requests-default-rtdb.asia-southeast1.firebasedatabase.app/movies';
+
 function App() {
 	const [movies, setMovies] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -16,9 +19,7 @@ function App() {
 		setRetry(true);
 
 		try {
-			const response = await fetch(
-				'https://react-api-http-requests-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json'
-			);
+			const response = await fetch(`${API_URL}.json`);
 			console.log(response.status);
 
 			if (!response.ok) {
@@ -73,19 +74,36 @@ function App() {
 
 	const addMovieHandler = useCallback(async (movie) => {
 		// console.log(movie);
-		const response = await fetch(
-			'https://react-api-http-requests-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json',
-			{
-				method: 'POST',
-				body: JSON.stringify(movie),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}
-		);
+		const response = await fetch(`${API_URL}.json`, {
+			method: 'POST',
+			body: JSON.stringify(movie),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
 		const data = response.json();
 		console.log(data);
 	}, []);
+
+	const deleteMoviesHandler = async (id) => {
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			const response = await fetch(`${API_URL}/${id}.json`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			console.log('Delete', response.status);
+
+			setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== id));
+		} catch (error) {
+			console.log(error);
+		}
+		setIsLoading(false);
+	};
 
 	const loadScreen = (
 		<div>
@@ -104,7 +122,7 @@ function App() {
 		content = loadScreen;
 	}
 	if (movies.length > 0) {
-		content = <MoviesList movies={movies} />;
+		content = <MoviesList movies={movies} onDelete={deleteMoviesHandler} />;
 	}
 	if (error) {
 		content = <p>{error}</p>;
