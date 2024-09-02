@@ -5,6 +5,7 @@ import './App.css';
 
 function App() {
 	const [movies, setMovies] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	// function fetchMoviesHandler() {
 	// 	fetch('https://swapi.dev/api/films/')
@@ -23,11 +24,30 @@ function App() {
 	// 			setMovies(transformedMovies);
 	// 		});
 	// }
+	const loadScreen = (
+		<div>
+			<p>Loading Movies...</p>
+			<img
+				src="https://i.gifer.com/WMDx.gif"
+				alt="loading spinner"
+				height="30"
+				width="30"
+			/>
+		</div>
+	);
 
 	async function fetchMoviesHandler() {
+		setIsLoading(true);
+
 		try {
 			const response = await fetch('https://swapi.dev/api/films/');
+
+			if (!response.ok) {
+				throw new Error('Something Went Wrong...');
+			}
+
 			const data = await response.json();
+
 			const transformedMovies = await data.results.map((movieData) => {
 				return {
 					id: movieData.episode_id,
@@ -37,6 +57,7 @@ function App() {
 				};
 			});
 			setMovies(transformedMovies);
+			setIsLoading(false);
 		} catch (error) {
 			console.log(error);
 		}
@@ -48,7 +69,9 @@ function App() {
 				<button onClick={fetchMoviesHandler}>Fetch Movies</button>
 			</section>
 			<section>
-				<MoviesList movies={movies} />
+				{!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
+
+				{isLoading && loadScreen}
 			</section>
 		</React.Fragment>
 	);
