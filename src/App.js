@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -9,30 +9,7 @@ function App() {
 	const [error, setError] = useState(null);
 	const [retry, setRetry] = useState(true);
 
-	const loadScreen = (
-		<div>
-			<p>Loading Movies...</p>
-			<img
-				src="https://i.gifer.com/WMDx.gif"
-				alt="loading spinner"
-				height="30"
-				width="30"
-			/>
-		</div>
-	);
-
-	let content = <p>No Movies Found</p>;
-	if (isLoading) {
-		content = loadScreen;
-	}
-	if (movies.length > 0) {
-		content = <MoviesList movies={movies} />;
-	}
-	if (error) {
-		content = <p>{error}</p>;
-	}
-
-	async function fetchMoviesHandler() {
+	const fetchMoviesHandler = useCallback(async () => {
 		setIsLoading(true);
 		setError(null);
 		setRetry(true);
@@ -70,12 +47,39 @@ function App() {
 			}, 5000);
 		}
 		setIsLoading(false);
-	}
+	}, []);
+
+	useEffect(() => {
+		fetchMoviesHandler();
+	}, [fetchMoviesHandler]);
 
 	const cancelRetry = () => {
-		console.log(retry);
 		setRetry(false);
+		console.log(retry);
 	};
+
+	const loadScreen = (
+		<div>
+			<p>Loading Movies...</p>
+			<img
+				src="https://i.gifer.com/WMDx.gif"
+				alt="loading spinner"
+				height="30"
+				width="30"
+			/>
+		</div>
+	);
+
+	let content = <p>No Movies Found</p>;
+	if (isLoading) {
+		content = loadScreen;
+	}
+	if (movies.length > 0) {
+		content = <MoviesList movies={movies} />;
+	}
+	if (error) {
+		content = <p>{error}</p>;
+	}
 
 	return (
 		<React.Fragment>
