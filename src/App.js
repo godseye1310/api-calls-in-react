@@ -36,7 +36,6 @@ function App() {
 					releaseDate: data[key].releaseDate,
 				});
 			}
-
 			// const transformedMovies = await loadedMovies.map((movieData) => {
 			// 	return {
 			// 		id: movieData.episode_id,
@@ -72,7 +71,7 @@ function App() {
 		console.log(retry);
 	};
 
-	async function addMovieHandler(movie) {
+	const addMovieHandler = useCallback(async (movie) => {
 		// console.log(movie);
 		const response = await fetch(
 			'https://react-api-http-requests-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json',
@@ -86,7 +85,7 @@ function App() {
 		);
 		const data = response.json();
 		console.log(data);
-	}
+	}, []);
 
 	const loadScreen = (
 		<div>
