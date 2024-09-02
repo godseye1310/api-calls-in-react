@@ -50,10 +50,10 @@ function App() {
 
 	async function fetchMoviesHandler() {
 		setIsLoading(true);
-		setError(null);
+		// setError(null);
 
 		try {
-			const response = await fetch('https://swapi.dev/api/film/');
+			const response = await fetch('https://swapi.dev/api/films/');
 
 			if (!response.ok) {
 				throw new Error('Something Went Wrong... Retrying');
@@ -78,13 +78,22 @@ function App() {
 		setIsLoading(false);
 	}
 
+	const retry = setTimeout(() => {
+		fetchMoviesHandler();
+	}, 5000);
+
+	const cancelRetry = () => {
+		clearTimeout(retry);
+		setError(null);
+	};
+
 	return (
 		<React.Fragment>
 			<section>
 				<button onClick={fetchMoviesHandler}>Fetch Movies</button>
 				<br />
 				<br />
-				<button>Cancel</button>
+				<button onClick={cancelRetry}>Cancel</button>
 			</section>
 			<section>{content}</section>
 		</React.Fragment>
