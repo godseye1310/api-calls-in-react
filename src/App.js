@@ -7,24 +7,8 @@ function App() {
 	const [movies, setMovies] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [retry, setRetry] = useState(true);
 
-	// function fetchMoviesHandler() {
-	// 	fetch('https://swapi.dev/api/films/')
-	// 		.then((response) => {
-	// 			return response.json();
-	// 		})
-	// 		.then((data) => {
-	// 			const transformedMovies = data.results.map((movieData) => {
-	// 				return {
-	// 					id: movieData.episode_id,
-	// 					title: movieData.title,
-	// 					openingText: movieData.opening_crawl,
-	// 					releaseDate: movieData.release_date,
-	// 				};
-	// 			});
-	// 			setMovies(transformedMovies);
-	// 		});
-	// }
 	const loadScreen = (
 		<div>
 			<p>Loading Movies...</p>
@@ -50,17 +34,18 @@ function App() {
 
 	async function fetchMoviesHandler() {
 		setIsLoading(true);
-		// setError(null);
+		setError(null);
+		setRetry(true);
 
 		try {
 			const response = await fetch('https://swapi.dev/api/films/');
+			console.log(response.status);
 
 			if (!response.ok) {
 				throw new Error('Something Went Wrong... Retrying');
 			}
 
 			const data = await response.json();
-
 			const transformedMovies = await data.results.map((movieData) => {
 				return {
 					id: movieData.episode_id,
@@ -70,21 +55,26 @@ function App() {
 				};
 			});
 			setMovies(transformedMovies);
-			setIsLoading(false);
+			setRetry(false);
+			// setIsLoading(false);
 		} catch (error) {
 			setError(error.message);
-			console.log(error.message);
+			// console.log(error.message);
+			setTimeout(() => {
+				setRetry((prevTry) => {
+					if (prevTry) {
+						fetchMoviesHandler();
+					}
+					return prevTry;
+				});
+			}, 5000);
 		}
 		setIsLoading(false);
 	}
 
-	const retry = setTimeout(() => {
-		fetchMoviesHandler();
-	}, 5000);
-
 	const cancelRetry = () => {
-		clearTimeout(retry);
-		setError(null);
+		console.log(retry);
+		setRetry(false);
 	};
 
 	return (
@@ -101,3 +91,21 @@ function App() {
 }
 
 export default App;
+
+// function fetchMoviesHandler() {
+// 	fetch('https://swapi.dev/api/films/')
+// 		.then((response) => {
+// 			return response.json();
+// 		})
+// 		.then((data) => {
+// 			const transformedMovies = data.results.map((movieData) => {
+// 				return {
+// 					id: movieData.episode_id,
+// 					title: movieData.title,
+// 					openingText: movieData.opening_crawl,
+// 					releaseDate: movieData.release_date,
+// 				};
+// 			});
+// 			setMovies(transformedMovies);
+// 		});
+// }
